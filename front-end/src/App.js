@@ -1,11 +1,11 @@
-import logo from './logo.svg';
 import './App.css';
+import Header from './Header';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+      <Header />
+      <main>
         <a
           className="App-link"
           href="https://f-project-node.onrender.com"
@@ -14,7 +14,7 @@ function App() {
         >
           Press here to go to the back-end first link
         </a>
-      </header>
+      </main>
     </div>
   );
 }
