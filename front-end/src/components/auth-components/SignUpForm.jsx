@@ -37,21 +37,7 @@ const SignUp = () => {
     { value: 'Traniee', label: 'Traniee' },
 
     ]
-    /*const LoginSchema = Yup.object().shape({
-        email: Yup.string().email('Email must be a valid email address').required('Email is required'),
-        password: Yup.string().required('Password is required'),
-    });
-Coordinator
-Lead Teacher 1
-Assistant Lead Teacher 5
-Teaching Assistant 6
-Personal Development Rep 2
 
-    const defaultValues = {
-        email: 'testadmin@soms.com',
-        password: '1234',
-    };
-    */
     const methods = useForm({
         resolver: yupResolver(schema),
         defaultValues: defaultValues
