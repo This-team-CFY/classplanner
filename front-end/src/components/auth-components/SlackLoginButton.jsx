@@ -14,7 +14,7 @@ export default function SlackLoginButton() {
 
     myUrlWithParams.searchParams.append("user_scope", "identity.basic,identity.email");
     myUrlWithParams.searchParams.append("redirect_uri", `${backendUrl}/auth/redirect`);
-    myUrlWithParams.searchParams.append("client_id", slackClientId);
+    myUrlWithParams.searchParams.append("client_id", "6209798254180.6224787694115");
 
     console.log(myUrlWithParams.href);
     let slack_url = myUrlWithParams.href;
