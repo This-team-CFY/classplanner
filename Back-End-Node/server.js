@@ -294,6 +294,7 @@ app.get("/events", async (req, res) => {
 app.get("/session", async (req, res) => {
    try {
     const result = await pool.query("SELECT * FROM public.session");
+    console.log(result)
     res.send(result.rows);
   } catch (error) {
     res.status(500).send("Error fetching session data");
