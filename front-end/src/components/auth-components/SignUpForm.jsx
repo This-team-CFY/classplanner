@@ -6,7 +6,7 @@ import SlackLoginButton from "./SlackLoginButton";
 
 export default function SignUpForm({ handleSlackSignup }) {
     return (
-        <Container style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+        <Container style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: "170px" }}>
             <div>
                 <img
                     src="https://miro.medium.com/v2/resize:fit:1199/1*1bpa1wQ4ktPd_z9oG1CuZA.jpeg"
