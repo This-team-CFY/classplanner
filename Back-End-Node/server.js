@@ -389,7 +389,7 @@ app.get("/attendance/:sessionId", async (req, res) => {
   const sessionId = req.params.sessionId;
   try {
     const result = await pool.query(
-      "SELECT person.slack_first_name, person.slack_last_name, role.name FROM attendance JOIN person ON attendance.person_id = person.id JOIN role ON attendance.role_id = role.id JOIN session ON attendance.session_id = session.id WHERE session.id = $1;",
+      "SELECT person.slack_firstname, person.slack_lastname, role.name FROM attendance JOIN person ON attendance.person_id = person.id JOIN role ON attendance.role_id = role.id JOIN session ON attendance.session_id = session.id WHERE session.id = $1;",
       [sessionId]
     );
 
