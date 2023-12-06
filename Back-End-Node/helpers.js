@@ -4,7 +4,7 @@ const getSignUpDetailsFromDatabase = async (userId) => {
   try {
     // Query to select all sign-up details with id from the table
     const query =
-      "SELECT person.first_name, person.last_name, role.role, session.location FROM attendee JOIN person ON attendee.person_id = person.id JOIN role ON attendee.role_id = role.id JOIN session ON attendee.session_id = session.id WHERE person.id = $1";
+      "SELECT person.first_name, person.last_name, role.role, session.location, attendee.session_id FROM attendee JOIN person ON attendee.person_id = person.id JOIN role ON attendee.role_id = role.id JOIN session ON attendee.session_id = session.id WHERE person.id = $1";
     // Execute the query
     const result = await pool.query(query, [userId]);
     // Return the rows from the result
