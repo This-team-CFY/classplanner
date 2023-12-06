@@ -63,20 +63,23 @@ app.get("/auth/redirect", async (req, res) => {
 
     let jwtToken = "";
 
-    if (existingUser.rows.length > 0) {
+    if (existingUser.rows.length > 0 ) {
+            await pool.query(
+              "UPDATE person SET slack_photo_link = $1, slack_firstname = $2, slack_lastname = $3, slack_title = $4 WHERE id = $5",
+              [
+                userProfile["profile"]["image_original"],
+                userProfile["profile"]["first_name"],
+                userProfile["profile"]["last_name"],
+                userProfile["profile"]["title"],
+                existingUser.rows[0]["id"],
+              ]
+            );
+
       jwtToken = createToken(
         existingUser.rows[0]["id"],
         existingUser.rows[0]["slack_title"]  // TODO: weird that title = jwt role
       );
 
-      // TODO: update values if changed
-      // // Update avatar if it has changed
-      // if (existingUser.rows[0]["avatar"] !== userProfile["profile"]["image_original"]) {
-      //   await pool.query("UPDATE person SET avatar = $1 WHERE id = $2", [
-      //     userProfile["profile"]["image_original"],
-      //     existingUser.rows[0]["id"],
-      //   ]);
-      // }
     } else {
       // Insert the new user into the database
       var insertResult = await pool.query(
