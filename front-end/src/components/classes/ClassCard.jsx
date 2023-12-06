@@ -31,6 +31,7 @@ const ClassCard = (props) => {
 
                     <div style={{ display: 'flex', gap: '10px' , marginTop:'15px'}}>
                         <SeeAttendancesButton whoLeading={props.who_leading} sessionId={props.sessionId} />
+                        {/* TODO: disable this SignUp button if user is already signed up, or show an alert if already signed up, or make it a 'cancel' button instead */}
                         <SignUpLessonButton sessionId={props.sessionId} />
                     </div>
 
