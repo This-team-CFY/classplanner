@@ -1,8 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import SignUpForm from "../components/auth-components/SignUpForm";
-import { makeStyles } from '@mui/styles';
-import backgroundImage from '../assets/cyf.png';
 import Box from '@mui/material/Box';
 import BottomCard from "../components/main-bottom/BottomCard"
 import LoginGuard from "../auth/LoginGuard";
@@ -27,9 +25,7 @@ export default function SignUp() {
                 <div>
                     <SignUpForm handleSignup={handleSignup} handleSlackSignup={handleSlackSignup} />
                 </div>
-
                 <div style={{ border: "1px solid red", marginRight: "200px", marginLeft:"200px", marginBottom: "40px" }}></div>
-          
                 <div style={{ display: 'flex', gap: '20px', justifyContent: 'center'}}>
                     <BottomCard h1={"Become a Student"} image={"https://codeyourfuture.io/wp-content/uploads/2022/06/Volunteer-Tech.jpg"} link={"https://codeyourfuture.io/become-a-student/"} />
                     <BottomCard h1={"Volunteering"} image={"https://codeyourfuture.io/wp-content/uploads/2023/11/Volunteer-Coco-v02.jpg"} link={"https://codeyourfuture.io/volunteers/"} />
