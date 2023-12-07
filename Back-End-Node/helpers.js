@@ -56,14 +56,14 @@ const updateUser = async (id,firstName, lastName, img) => {
          );
 }
 
-const createUser = async (img, firstName, lastName,role) => {
+const createUser = async (img, firstName, lastName, email, role) => {
   const insertResult = await pool.query(
-    "INSERT INTO person (slack_photo_link, slack_firstname, slack_lastname, slack_email, slack_title) VALUES ($1, $2, $3, $4, $5) RETURNING id"
-  ,
+    "INSERT INTO person (slack_photo_link, slack_firstname, slack_lastname, slack_email, slack_title) VALUES ($1, $2, $3, $4, $5) RETURNING id",
     [
       img,
       firstName,
       lastName,
+      email,
       role,
     ]
 )

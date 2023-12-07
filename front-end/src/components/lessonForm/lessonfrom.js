@@ -32,11 +32,14 @@ export default function LessonForm() {
     console.log("Form submitted");
        
     try{
-      const response = await axios.post("/lesson_content", {module: module,
-    module_no: module_no,
-    week_no: week_no,
-    lesson_topic: topic,
-    syllabus_link: link});
+      // TODO for Anna: these variables are not being populated from the EditableFields
+      const response = await axios.post("/lesson_content", {
+        module: module,
+        module_no: parseInt(module_no),
+        week_no: parseInt(week_no),
+        lesson_topic: topic,
+        syllabus_link: link
+      });
     }
     catch (error){
       console.log(error)
