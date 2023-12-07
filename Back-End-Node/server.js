@@ -79,7 +79,7 @@ app.get("/auth/redirect", async (req, res) => {
         existingUser.rows[0]["slack_lastname"] !==
           userProfile["profile"]["last_name"]
       ) {
-        updateUser(
+        await updateUser(
           existingUser.rows[0]["id"],
           userProfile["profile"]["last_name"],
           userProfile["profile"]["first_name"],
@@ -107,10 +107,11 @@ app.get("/auth/redirect", async (req, res) => {
           error: "You can not register as admin",
         });
       }
-      const insertResult = createUser(
+      const insertResult = await createUser(
         userProfile["profile"]["image_original"],
         userProfile["profile"]["first_name"],
         userProfile["profile"]["last_name"],
+        userProfile["profile"]["email"],
         role
       );
 
@@ -435,7 +436,8 @@ app.post("/lesson_content", verifyToken, async (req, res) => {
     );
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: "Something went wrong." });
+    console.log(error);
+    res.status(500).json({ error: JSON.stringify(error) });
   }
 });
 

@@ -33,7 +33,8 @@ CREATE TABLE lesson_content (
     module_no INT,
     week_no INT,
     lesson_topic VARCHAR(250),
-    syllabus_link VARCHAR(250)
+    syllabus_link VARCHAR(250),
+    UNIQUE (module, module_no, week_no)
 );
 
 CREATE TABLE session (
@@ -44,7 +45,8 @@ CREATE TABLE session (
     event_type VARCHAR(250),  -- e.g. Technical Education/Personal Development
     location VARCHAR(250),  -- can also be Zoom link
     lesson_content_id INT REFERENCES lesson_content(id),  -- derive name of session from this+cohort
-    cohort_id INT REFERENCES cohort(id)
+    cohort_id INT REFERENCES cohort(id),
+    UNIQUE (date, cohort_id)
 );
 
 CREATE TABLE attendance (
@@ -52,9 +54,13 @@ CREATE TABLE attendance (
     period VARCHAR(100),
     person_id INT REFERENCES person(id),
     session_id INT REFERENCES session(id),
-    role_id INT REFERENCES role(id)
+    role_id INT REFERENCES role(id),
+    UNIQUE(person_id, session_id)
 );
 
-INSERT INTO region (name) VALUES (Glasgow);
-INSERT INTO region (name) VALUES (London);
--- TODO add more defaults
+INSERT INTO region (name) VALUES ('Glasgow');
+INSERT INTO region (name) VALUES ('London');
+INSERT INTO role (name) VALUES ('Zoom Master');
+INSERT INTO role (name) VALUES ('Tech Ed Assistant');
+INSERT INTO role (name) VALUES ('Personal Development Lead');
+INSERT INTO cohort (name, region_id) VALUES ('London 10', 2);
