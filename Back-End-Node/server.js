@@ -322,8 +322,7 @@ app.post("/insert-signup", verifyToken, async (req, res) => {
     const userId = req.userId;
     const role = req.body.role;
     await insertSignUp(sessionId, role, userId);
-    try {
-      //console.log("SESSION ID AND PERSON ID", sessionId, " rooolle:: ", userId)
+    try {  // email service
       await reminderEmail(userId, sessionId);
 
     } catch (error) {
@@ -416,18 +415,5 @@ app.get("/roles", async (req, res) => {
     res.status(500).json({ error: "Something went wrong." });
   }
 });
-
-/* app.post('/send-reminder-email', async (req, res) => {
-  try {
-    const { sessionId, userId } = req.body;
-    console.log("SESSION ID AND PERSON ID", sessionId, " rooolle:: ", userId)
-    await reminderEmail(sessionId, userId);
-
-  } catch (error) {
-    console.error('Error sending reminder email:', error);
-    res.status(500).json({ error: 'Something went wrong.' });
-  }
-}); */
-
 
 //export default app;
