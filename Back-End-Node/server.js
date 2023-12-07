@@ -131,6 +131,17 @@ app.get("/cities", async (req, res) => {
   }
 });
 
+//cohort
+app.get("/cohort", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM cohort");
+    res.send(result.rows);
+  } catch (error) {
+    res.status(500).send("Error fetching cohort data");
+    console.error("Error executing query:", error);
+  }
+});
+
 app.get("/create-event", async (req, res) => {
   //console.log(calendar);
   let newEvent = {
