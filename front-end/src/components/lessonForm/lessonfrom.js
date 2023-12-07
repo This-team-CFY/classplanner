@@ -29,8 +29,6 @@ export default function LessonForm() {
   
 
   async function submitForm() {
-    console.log("Form submitted");
-       
     try{
       // TODO for Anna: these variables are not being populated from the EditableFields
       const response = await axios.post("/lesson_content", {
