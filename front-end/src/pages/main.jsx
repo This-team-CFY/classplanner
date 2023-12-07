@@ -43,7 +43,8 @@ const Main = () => {
 
         <UserGuard>
             <div className="main-container" style={{
-                marginTop: "200px"}}>
+                marginTop: "200px"
+            }}>
                 <Navbar />
                 {data.map((s) => (
                     <ClassCard

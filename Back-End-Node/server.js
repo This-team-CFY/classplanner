@@ -20,6 +20,9 @@ const {
   getSignUpDetailsFromDatabase,
   cancelSignUp,
   insertSignUp,
+  updateUser,
+  createUser,
+  updateTitle,
 } = require("./helpers.js");
 
 app.use(cors());
@@ -64,41 +67,58 @@ app.get("/auth/redirect", async (req, res) => {
     );
 
     let jwtToken = "";
+    const role = userProfile["profile"]["title"].toLowerCase();
 
     if (existingUser.rows.length > 0) {
-      jwtToken = createToken(
-        existingUser.rows[0]["id"],
-        existingUser.rows[0]["slack_title"]  // TODO: weird that title = jwt role
-      );
-
-      // TODO: update values if changed
-      // // Update avatar if it has changed
-      // if (existingUser.rows[0]["avatar"] !== userProfile["profile"]["image_original"]) {
-      //   await pool.query("UPDATE person SET avatar = $1 WHERE id = $2", [
-      //     userProfile["profile"]["image_original"],
-      //     existingUser.rows[0]["id"],
-      //   ]);
-      // }
-    } else {
-      // Insert the new user into the database
-      var insertResult = await pool.query(
-        "INSERT INTO person (slack_photo_link, slack_firstname, slack_lastname, slack_email, slack_title) VALUES ($1, $2, $3, $4, $5) RETURNING id, slack_title",
-        [
-          userProfile["profile"]["image_original"],
-          userProfile["profile"]["first_name"],
+      //login
+      if (
+        existingUser.rows[0]["slack_firstname"] !==
+          userProfile["profile"]["first_name"] ||
+        existingUser.rows[0]["slack_photo_link"] !==
+          userProfile["profile"]["image_original"] ||
+        existingUser.rows[0]["slack_lastname"] !==
+          userProfile["profile"]["last_name"]
+      ) {
+        updateUser(
+          existingUser.rows[0]["id"],
           userProfile["profile"]["last_name"],
-          userProfile["profile"]["email"],
-          userProfile["profile"]["title"],
-        ]
-      );
-      jwtToken = createToken(
-        insertResult.rows[0]["id"],
-        insertResult.rows[0]["slack_title"]  // TODO: weird that title = jwt role
-      );
-    }
+          userProfile["profile"]["first_name"],
+          userProfile["profile"]["image_original"]
+        );
+      }
+      if (
+        existingUser.rows[0]["slack_title"].toLowerCase() !== "admin" &&
+        role !== existingUser.rows[0]["slack_title"].toLowerCase() &&
+        role !== "admin"
+      ) {
+        updateTitle(existingUser.rows[0]["id"], role);
+      } else if (role == "admin" && existingUser.rows[0]["slack_title"] !== "admin") {
+        res
+          .status(401)
+          .json({ error: "You can not change your role as admin" });
+      }
 
-    // redirect back to frontend so that it can run setSession with this token
-    res.redirect(`${frontendUrl}/oauthdone?code=${jwtToken}`);
+      jwtToken = createToken(existingUser.rows[0]["id"], role);
+      return res.redirect(`${frontendUrl}/oauthdone?code=${jwtToken}`);
+    } else {
+      //signup
+      if (role == "admin") {
+        res.status(401).json({
+          error: "You can not register as admin",
+        });
+      }
+      const insertResult = createUser(
+        userProfile["profile"]["image_original"],
+        userProfile["profile"]["first_name"],
+        userProfile["profile"]["last_name"],
+        role
+      );
+
+      jwtToken = createToken(insertResult.rows[0]["id"], role);
+
+      // redirect back to frontend so that it can run setSession with this token
+      res.redirect(`${frontendUrl}/oauthdone?code=${jwtToken}`);
+    }
   } catch (error) {
     console.error("Error during OAuth process:", error);
     res.status(500).send("Something went wrong!");
@@ -315,12 +335,11 @@ app.get("/cancel-signup/:sessionId", verifyToken, async (req, res) => {
 //Profile endpoint
 app.get("/signup-details", verifyToken, async (req, res) => {
   const userId = req.userId;
-  const sessionId = req.body.sessionId
+  const sessionId = req.body.sessionId;
   try {
     const signUpDetails = await getSignUpDetailsFromDatabase(userId, sessionId);
 
     res.json(signUpDetails.rows);
-    
   } catch (error) {
     console.error("Error fetching sign-up details:", error);
     res.status(500).json({ error: "Something went wrong." });
@@ -332,6 +351,7 @@ app.post("/insert-signup", verifyToken, async (req, res) => {
     const sessionId = req.body.sessionId;
     const userId = req.userId;
     const role = req.body.role;
+    
     await insertSignUp(sessionId, role, userId);
     try {  // email service
       await reminderEmail(userId, sessionId);
@@ -375,22 +395,43 @@ app.get("/session", async (req, res) => {
     console.error("Error executing query:", error);
   }
 });
-app.post("/session", async (req, res) => {
+
+app.post("/session", verifyToken, async (req, res) => {
   try {
     await pool.query(
       "INSERT INTO session(date, time_start, time_end, event_type, location, lesson_content_id, cohort_id) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-      [new Date(), new Date(), new Date(), "Technical Education", "London", 1, 1]
+      [
+        new Date(),
+        new Date(),
+        new Date(),
+        "Technical Education",
+        "London",
+        1,
+        1,
+      ]
     );
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: "Something went wrong." });
   }
 });
-app.post("/lesson_content", async (req, res) => {
+
+app.get("/lesson_content", async (req, res) => {
   try {
+    const result = await pool.query("Select * from lesson_content");
+    res.send(result.rows);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+app.post("/lesson_content", verifyToken, async (req, res) => {
+  try {
+    const { module, module_no, week_no, lesson_topic, syllabus_link } =
+      req.body;
     await pool.query(
-      "INSERT INTO lesson_content(module, module_no, week_no, lesson_topic, syllabus_link) VALUES ( $1, $2, $3, $4, $5)",
-      ["Databases", 3, 1, "Test Topic", "codeyourfuture.com"]
+      "INSERT INTO lesson_content(module, module_no, week_no, lesson_topic, syllabus_link) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (module, module_no, week_no) DO UPDATE SET lesson_topic = $4, syllabus_link = $5",
+      [module, module_no, week_no, lesson_topic, syllabus_link]
     );
     res.json({ success: true });
   } catch (error) {
@@ -403,7 +444,7 @@ app.get("/attendance/:sessionId", async (req, res) => {
   const sessionId = req.params.sessionId;
   try {
     const result = await pool.query(
-      "SELECT person.slack_first_name, person.slack_last_name, role.name FROM attendance JOIN person ON attendance.person_id = person.id JOIN role ON attendance.role_id = role.id JOIN session ON attendance.session_id = session.id WHERE session.id = $1;",
+      "SELECT person.slack_firstname, person.slack_lastname, role.name FROM attendance JOIN person ON attendance.person_id = person.id JOIN role ON attendance.role_id = role.id JOIN session ON attendance.session_id = session.id WHERE session.id = $1;",
       [sessionId]
     );
 

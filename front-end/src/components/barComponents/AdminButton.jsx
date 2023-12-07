@@ -5,24 +5,24 @@ import { useAuthContext } from "../../auth/useAutContext";
 
 const AdminButton = () => {
 
-    const {user} = useAuthContext()
+    const { user } = useAuthContext();
     const [isAdmin, setAdmin] = useState(false);
 
-    // useEffect(() => {
-    //     const token = localStorage.getItem('accessToken');
+    useEffect(() => {
+        const token = localStorage.getItem('accessToken');
 
-    //     if (token) {
-    //         const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        if (token) {
+            const decodedToken = JSON.parse(atob(token.split('.')[1]));
 
-    //         if (decodedToken.roles.includes('admin')) {
-    //             setAdmin(true);
-    //         }
-    //     }
-    // }, []);
+            if (decodedToken.roles == 'admin') {
+                setAdmin(true);
+            }
+        }
+    }, []);
 
     return (
         <div>
-            {user?.roles == "admin" && (
+            {isAdmin && (
                 <Link to="/create">
                     <Button variant="contained">Add & Edit</Button>
                 </Link>

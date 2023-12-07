@@ -41,8 +41,52 @@ const insertSignUp = async (sessionId, role, userId) => {
   }
 };
 
+
+const updateUser = async (id,firstName, lastName, img) => {
+         await pool.query(
+           "UPDATE person SET slack_photo_link = $1, slack_firstname = $2, slack_lastname = $3 WHERE id = $4",
+           [
+
+            img,
+            firstName,
+            lastName,
+            id
+      
+           ]
+         );
+}
+
+const createUser = async (img, firstName, lastName,role) => {
+  const insertResult = await pool.query(
+    "INSERT INTO person (slack_photo_link, slack_firstname, slack_lastname, slack_email, slack_title) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+  ,
+    [
+      img,
+      firstName,
+      lastName,
+      role,
+    ]
+)
+    return insertResult
+};
+
+const updateTitle = async (id, title) => {
+  await pool.query(
+           "UPDATE person SET slack_title = $1 WHERE id = $2",
+           [
+
+            title,
+            id,
+      
+           ]
+         );
+}
+
 module.exports = {
   cancelSignUp,
   getSignUpDetailsFromDatabase,
   insertSignUp,
+  updateUser,
+  createUser,
+  updateTitle,
 };
