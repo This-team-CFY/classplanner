@@ -4,33 +4,88 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from '../../utils/axios';
 
+// id SERIAL PRIMARY KEY,
+//     date TIMESTAMP,
+//     time_start TIMESTAMP,
+//     time_end TIMESTAMP,
+//     event_type VARCHAR(250),  -- e.g. Technical Education/Personal Development
+//     location VARCHAR(250),  -- can also be Zoom link
+//     lesson_content_id INT REFERENCES lesson_content(id),  -- derive name of session from this+cohort
+//     cohort_id INT REFERENCES cohort(id)
 
-const module = ["HTML", "CSS", "JS1", "JS2", "JS3", "Node.js", "SQL"];
-const location = [1, 2, 3, 4, 5];
-const city = ["London", "Glasgow", "Manchester"];
-const lesson = [
-  "HTML_link",
-  "CSS_link",
-  "JS1_link",
-  "JS2_link",
-  "JS3_link",
-  "Node.js_link",
-  "SQL_link",
-];
 
 export default function SessionForm() {
-  async function submitForm() {
-    console.log("Form submitted");
-    const response = await axios.post("/session", {});
-  }
-
-  const [inputValue, setInputValue] = useState("Saturday Session");
+  const [event, setEvent] = useState(["Saturday Session"]);
+  const [location, setLocation] = useState("");
+  const [cohort, setCohort] = useState([]);
+  const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(null);
 
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-  };
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await axios.get("session");
+        const cohorts = await axios.get("cohort");
+        setEvent(response.data.map((item) => item.event_type));
+        setLocation(response.data.map((item) => item.location));
+        setCohort(response.data.map((item) => item.cohort));
+        setDescription(
+          response.data.map(
+            (item) =>
+              `Module: ${item.module},\nWeek: ${item.module_week},\n link: ${item.syllabus_link}`
+          )
+        );
+  //      [
+//   {
+//     id: 2,
+//     date: "2023-12-05T23:02:48.797Z",
+//     time_start: "2023-12-05T23:02:48.797Z",
+//     time_end: "2023-12-05T23:02:48.797Z",
+//     who_leading: "Barath",
+//     cohort: "London 10",
+//     city: "London",
+//     location: "London",
+//     module_name: "Databases",
+//     module_week: 1,
+//     syllabus_link: "codeyourfuture.com",
+//   },
+// ];
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchData();
+  }, []);
+
+  async function submitForm() {
+    const {module_name, module_week, syllabus_link} = JSON.parse(description);
+    try {
+      const response = await axios.post("/session", {
+        id: 2,
+        date: startDate.split("T")[0],
+        time_start: startDate.split("T")[1].split(".")[0],
+        time_end: endDate.split("T")[1].split(".")[0],
+        cohort: cohort,
+        //     city: "London",
+        location: location,
+        module_name: module_name,
+        module_week: module_week,
+        syllabus_link: syllabus_link,
+        event_type: event,
+//     lesson_content_id INT REFERENCES lesson_content(id),  -- derive name of session from this+cohort
+//     cohort_id INT REFERENCES cohort(id)
+      });
+    } catch (error) {
+      console.log(error);
+    }
+    
+  }
+
+  //const [inputValue, setInputValue] = useState("Saturday Session");
+  // const handleInputChange = (e) => {
+  //   setInputValue(e.target.value);
+  // };
 
   return (
     <div className="formDiv">
@@ -39,15 +94,7 @@ export default function SessionForm() {
         <label className="form-label">
           {" "}
           Event<br></br>
-          <div className="input-line">
-            <input
-              type="text"
-              name="event_name"
-              value={inputValue}
-              onChange={handleInputChange}
-              autoFocus
-            />
-          </div>
+          <EditableField name="event" type="text" options={event} />
         </label>
         <label className="form-label">
           Date
@@ -78,14 +125,14 @@ export default function SessionForm() {
         </label>
         <label className="form-label">
           {" "}
-          City(calendar)<br></br>
-          <EditableField name="city" type="text" options={city} />
+          Cohort<br></br>
+          <EditableField name="cohort" type="text" options={cohort} />
         </label>
         <label className="form-label">
           {" "}
           Description
           <br></br>
-          <EditableField name="description" type="text" options={lesson} />
+          <EditableField name="description" type="text" options={description} />
         </label>
       </form>
       <button type="submit" onClick={submitForm}>

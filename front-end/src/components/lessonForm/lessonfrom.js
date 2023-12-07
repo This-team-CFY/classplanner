@@ -29,8 +29,6 @@ export default function LessonForm() {
   
 
   async function submitForm() {
-    console.log("Form submitted");
-       
     try{
       const response = await axios.post("/lesson_content", {module: module,
     module_no: module_no,
