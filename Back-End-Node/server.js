@@ -19,6 +19,9 @@ const {
   getSignUpDetailsFromDatabase,
   cancelSignUp,
   insertSignUp,
+  updateUser,
+  createUser,
+  updateTitle,
 } = require("./helpers.js");
 
 app.use(cors());
@@ -62,79 +65,58 @@ app.get("/auth/redirect", async (req, res) => {
     );
 
     let jwtToken = "";
-    const role = userProfile["profile"]["title"];
+    const role = userProfile["profile"]["title"].toLowerCase();
 
-    if (
-      existingUser.rows.length > 0 &&
-      existingUser.rows[0]["slack_title"].toLowerCase() === "admin" &&
-      role.toLowerCase() === "admin"
-    ) {
-      await pool.query(
-        "UPDATE person SET slack_photo_link = $1, slack_firstname = $2, slack_lastname = $3 WHERE id = $4",
-        [
-          userProfile["profile"]["image_original"],
-          userProfile["profile"]["first_name"],
-          userProfile["profile"]["last_name"],
+    if (existingUser.rows.length > 0) {
+      //login
+      if (
+        existingUser.rows[0]["slack_firstname"] !==
+          userProfile["profile"]["first_name"] ||
+        existingUser.rows[0]["slack_photo_link"] !==
+          userProfile["profile"]["image_original"] ||
+        existingUser.rows[0]["slack_lastname"] !==
+          userProfile["profile"]["last_name"]
+      ) {
+        updateUser(
           existingUser.rows[0]["id"],
-        ]
-      );
-
-      jwtToken = createToken(
-        existingUser.rows[0]["id"],
-        existingUser.rows[0]["slack_title"]
-      );
-    } else if (
-      existingUser.rows.length > 0 &&
-      existingUser.rows[0]["slack_title"].toLowerCase() !== "admin" &&
-      role.toLowerCase() === "admin"
-    ) {
-      // If the user is not admin in database, but the user slack title in slack profile  is admin
-      res.status(500).json({ error: "You can not sign up as an admin" });
-    } else if (
-      existingUser.rows.length > 0 &&
-      existingUser.rows[0]["slack_title"].toLowerCase() !== "admin" &&
-      role.toLowerCase() !== "admin"
-    ) {
-      // Existing user update
-      await pool.query(
-        "UPDATE person SET slack_photo_link = $1, slack_firstname = $2, slack_lastname = $3 WHERE id = $4",
-        [
-          userProfile["profile"]["image_original"],
-          userProfile["profile"]["first_name"],
           userProfile["profile"]["last_name"],
-          existingUser.rows[0]["id"],
-        ]
-      );
+          userProfile["profile"]["first_name"],
+          userProfile["profile"]["image_original"]
+        );
+      }
+      if (
+        existingUser.rows[0]["slack_title"].toLowerCase() !== "admin" &&
+        role !== existingUser.rows[0]["slack_title"].toLowerCase() &&
+        role !== "admin"
+      ) {
+        updateTitle(existingUser.rows[0]["id"], role);
+      } else if (role == "admin" && existingUser.rows[0]["slack_title"] !== "admin") {
+        res
+          .status(401)
+          .json({ error: "You can not change your role as admin" });
+      }
 
-      jwtToken = createToken(
-        existingUser.rows[0]["id"],
-        existingUser.rows[0]["slack_title"]
-      );
-    } else if (
-      existingUser.rows.length === 0 &&
-      role.toLowerCase() === "admin"
-    ) {
-      res.status(500).json({ error: "You can not sign up as an admin" });
+      jwtToken = createToken(existingUser.rows[0]["id"], role);
+      return res.redirect(`${frontendUrl}/oauthdone?code=${jwtToken}`);
     } else {
-      const insertResult = await pool.query(
-        "INSERT INTO person (slack_photo_link, slack_firstname, slack_lastname, slack_email, slack_title) VALUES ($1, $2, $3, $4, $5) RETURNING id, slack_title",
-        [
-          userProfile["profile"]["image_original"],
-          userProfile["profile"]["first_name"],
-          userProfile["profile"]["last_name"],
-          userProfile["profile"]["email"],
-          role,
-        ]
+      //signup
+      if (role == "admin") {
+        res.status(401).json({
+          error: "You can not register as admin",
+        });
+      }
+      const insertResult = createUser(
+        userProfile["profile"]["image_original"],
+        userProfile["profile"]["first_name"],
+        userProfile["profile"]["last_name"],
+        role
       );
 
-      jwtToken = createToken(
-        insertResult.rows[0]["id"],
-        insertResult.rows[0]["slack_title"]
-      );
+      jwtToken = createToken(insertResult.rows[0]["id"], role);
+
+      // redirect back to frontend so that it can run setSession with this token
+      res.redirect(`${frontendUrl}/oauthdone?code=${jwtToken}`);
     }
-
-    // redirect back to frontend so that it can run setSession with this token
-    res.redirect(`${frontendUrl}/oauthdone?code=${jwtToken}`);
   } catch (error) {
     console.error("Error during OAuth process:", error);
     res.status(500).send("Something went wrong!");
@@ -418,22 +400,19 @@ app.post("/session", verifyToken, async (req, res) => {
   }
 });
 
-
-app.get("/lesson_content", async (req,res) => {
+app.get("/lesson_content", async (req, res) => {
   try {
-    const result = await pool.query(
-      "Select * from lesson_content"
-    )
-    res.send(result.rows)
-  }
-  catch (error) {
+    const result = await pool.query("Select * from lesson_content");
+    res.send(result.rows);
+  } catch (error) {
     res.status(500).send(error);
   }
 });
 
 app.post("/lesson_content", verifyToken, async (req, res) => {
   try {
-    const { module, module_no, week_no, lesson_topic, syllabus_link } = req.body;
+    const { module, module_no, week_no, lesson_topic, syllabus_link } =
+      req.body;
     await pool.query(
       "INSERT INTO lesson_content(module, module_no, week_no, lesson_topic, syllabus_link) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (module, module_no, week_no) DO UPDATE SET lesson_topic = $4, syllabus_link = $5",
       [module, module_no, week_no, lesson_topic, syllabus_link]
