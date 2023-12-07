@@ -13,6 +13,16 @@ import { Link } from 'react-router-dom';
 import { useAuthContext } from '../../auth/useAutContext';
 import SchoolIcon from '@mui/icons-material/School';
 import AdminButton from './AdminButton';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import MenuIcon from '@mui/icons-material/Menu'; 
+import Drawer from '@mui/material/Drawer';
+import Hidden from '@mui/material/Hidden'; 
+
+
+const drawerWidth = 240;
+
 
 
 
@@ -66,14 +76,23 @@ const Navbar = () => {
         window.location.href = '/main';
     };
 
+    const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+
+
     return (
         <Box sx={{ flexGrow: 1 }}>
-            <AppBar sx={{
-                backgroundColor: '#36454f', position: "fixed", marginTop: "90px", '@media screen and (max-width: 768px)': {
-                    minHeight: '70px',
-                    height: 'auto',
-                    marginTop: '140px',
-                }, }}>
+            <AppBar
+                sx={{
+                    backgroundColor: '#36454f',
+                    position: 'fixed',
+                    marginTop: '90px',
+                    '@media screen and (max-width: 1000px)': {
+                        minHeight: '70px',
+                        height: 'auto',
+                        marginTop: '140px',
+                    },
+                }}
+            >
                 <Toolbar>
                     <NavbarFilter />
                     <Search>
@@ -87,26 +106,63 @@ const Navbar = () => {
                     </Search>
                     <Box sx={{ flexGrow: 1 }} />
                     <AdminButton />
-                    <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                        <IconButton size="large" color="inherit">
-                            <SchoolIcon onClick={mainPage} />
+                    <Hidden mdUp>
+                        {/* Only show the hamburger menu on screens below 1000px */}
+                        <IconButton size="large" color="inherit" onClick={() => setIsDrawerOpen(true)}>
+                            <MenuIcon />
                         </IconButton>
-                        <IconButton
-                            component={Link}
-                            to="/profile"
-                            size="large"
-                            aria-label="account of current user"
-                            aria-haspopup="true"
-                            color="inherit"
-                        >
-                            <AccountCircle />
-                        </IconButton>
-                    </Box>
-                    <IconButton color="inherit" onClick={handleLogout}>
-                        <LogoutIcon />
-                    </IconButton>
+                    </Hidden>
+                    <Hidden smDown>
+                        {/* Hide these icons on screens below 1000px */}
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Hidden mdDown>
+                                <IconButton size="large" color="inherit">
+                                    <SchoolIcon onClick={mainPage} />
+                                </IconButton>
+                            </Hidden>
+                            <Hidden mdDown>
+                                <IconButton
+                                    component={Link}
+                                    to="/profile"
+                                    size="large"
+                                    aria-label="account of current user"
+                                    aria-haspopup="true"
+                                    color="inherit"
+                                >
+                                    <AccountCircle />
+                                </IconButton>
+                            </Hidden>
+                            <Hidden mdDown>
+                                <IconButton color="inherit" onClick={handleLogout}>
+                                    <LogoutIcon />
+                                </IconButton>
+                            </Hidden>
+                        </Box>
+                    </Hidden>
                 </Toolbar>
             </AppBar>
+
+            <Drawer
+                anchor="right"
+                open={isDrawerOpen}
+                onClose={() => setIsDrawerOpen(false)}
+                sx={{
+                    width: 250,
+                    flexShrink: 0,
+                }}
+            >
+                <List>
+                    <ListItem onClick={mainPage}>
+                        <ListItemText primary="Classes" />
+                    </ListItem>
+                    <ListItem component={Link} to="/profile">
+                        <ListItemText primary="Profile" />
+                    </ListItem>
+                    <ListItem button onClick={handleLogout}>
+                        <ListItemText primary="Logout" />
+                    </ListItem>
+                </List>
+            </Drawer>
         </Box>
     );
 };

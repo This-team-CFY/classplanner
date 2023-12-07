@@ -9,7 +9,6 @@ export const setSession = (accessToken) => {
 
   } else {
     localStorage.removeItem("accessToken");
-
     delete axios.defaults.headers.common.Authorization;
   }
 };
