@@ -14,7 +14,7 @@ const AdminButton = () => {
         if (token) {
             const decodedToken = JSON.parse(atob(token.split('.')[1]));
 
-            if (decodedToken.roles.includes('admin')) {
+            if (decodedToken.roles == 'admin') {
                 setAdmin(true);
             }
         }
