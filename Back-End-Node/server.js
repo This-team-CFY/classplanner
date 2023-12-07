@@ -406,7 +406,6 @@ app.get("/lesson_content", async (req, res) => {
     res.send(result.rows);
   } catch (error) {
     res.status(500).send(error);
-    console.log(error)
   }
 });
 
@@ -415,13 +414,12 @@ app.post("/lesson_content", verifyToken, async (req, res) => {
     const { module, module_no, week_no, lesson_topic, syllabus_link } =
       req.body;
     await pool.query(
-      "INSERT INTO lesson_content(module, module_no, week_no, lesson_topic, syllabus_link) VALUES ($1, $2, $3, $4, $5)",
+      "INSERT INTO lesson_content(module, module_no, week_no, lesson_topic, syllabus_link) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (module, module_no, week_no) DO UPDATE SET lesson_topic = $4, syllabus_link = $5",
       [module, module_no, week_no, lesson_topic, syllabus_link]
     );
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: "Something went wrong." });
-    console.log(error)
   }
 });
 
