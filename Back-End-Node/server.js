@@ -14,6 +14,7 @@ const jwt = require("jsonwebtoken");
 const frontendUrl = process.env.FRONT_END_URL;
 const verifyToken = require("./verifyToken");
 const verifyAdminToken = require("./verifyAdminToken.js");
+const reminderEmail = require('./reminder');
 
 const {
   getSignUpDetailsFromDatabase,
@@ -27,6 +28,7 @@ const {
 app.use(cors());
 app.use(express.json());
 require("dotenv").config();
+app.use('/api', reminderEmail); //reminder email
 const client_id = process.env.VITE_SLACK_CLIENT_ID;
 const client_secret = process.env.SLACK_CLIENT_SECRET;
 const redirect_uri = `${process.env.BACK_END_URL_SLACK}/auth/redirect`;
@@ -145,6 +147,17 @@ app.get("/cities", async (req, res) => {
     res.send(result.rows);
   } catch (error) {
     res.status(500).send("Error fetching city data");
+    console.error("Error executing query:", error);
+  }
+});
+
+//cohort
+app.get("/cohort", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM cohort");
+    res.send(result.rows);
+  } catch (error) {
+    res.status(500).send("Error fetching cohort data");
     console.error("Error executing query:", error);
   }
 });
@@ -307,7 +320,6 @@ app.get("/cancel-signup/:sessionId", verifyToken, async (req, res) => {
   try {
     const sessionId = req.params.sessionId;
     const userId = req.userId;
-    console.log(sessionId, "  and  ", userId);
     await cancelSignUp(sessionId, userId);
 
     res.json({ success: true });
@@ -326,7 +338,7 @@ app.get("/signup-details", verifyToken, async (req, res) => {
   const sessionId = req.body.sessionId;
   try {
     const signUpDetails = await getSignUpDetailsFromDatabase(userId, sessionId);
-    //console.log(signUpDetails)
+
     res.json(signUpDetails.rows);
   } catch (error) {
     console.error("Error fetching sign-up details:", error);
@@ -339,11 +351,15 @@ app.post("/insert-signup", verifyToken, async (req, res) => {
     const sessionId = req.body.sessionId;
     const userId = req.userId;
     const role = req.body.role;
-    console.log("AsessionId:: ", sessionId);
-    console.log("AuserId:: ", userId);
-    console.log("role:: ", role);
-
+    
     await insertSignUp(sessionId, role, userId);
+    try {  // email service
+      await reminderEmail(userId, sessionId);
+
+    } catch (error) {
+      console.error('Error sending reminder email:', error);
+      res.status(500).json({ error: 'Something went wrong.' });
+    }
     res.json({ success: true });
   } catch (error) {
     console.error("Error insert sign-up:", error);
