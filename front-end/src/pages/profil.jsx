@@ -23,7 +23,7 @@ export default function Profile() {
         const fetchUserData = async () => {
             try {
 
-                const response = await axios.get("http://localhost:10000/profile");
+                const response = await axios.get("/profile");
                 /* console.log(response); */
 
                 if (response.statusText !== "OK") {
