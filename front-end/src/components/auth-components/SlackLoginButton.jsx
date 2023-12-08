@@ -45,7 +45,6 @@ const SlackLoginButton = ({ onLoged, onError }) => {
             };
 
             try {
-                console.log(popup.location)
                 if (!popup.location.hostname.includes('slack.com')) {
                     if (popup.location.search) {
                         const query = new URLSearchParams(popup.location.search);
@@ -69,7 +68,6 @@ const SlackLoginButton = ({ onLoged, onError }) => {
     };
 
     const onSuccess = (code) => {
-        console.log(code);
         onLoged(code);
     };
 

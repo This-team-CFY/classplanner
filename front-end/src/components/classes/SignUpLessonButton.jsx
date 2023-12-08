@@ -11,7 +11,6 @@ const SignUpLessonButton = (props) => {
         const fetchRole = async () => {
             try {
                 const response = await axios.get("roles");
-                console.log(response)
                 const data = response.data;
                 setAvailableRoles(data);
                 if (data.length > 0) {
@@ -51,7 +50,6 @@ const SignUpLessonButton = (props) => {
         } catch (error) {
             console.error("Error insert sign-up :", error);
         }
-        console.log("sessionId:", props.sessionId);
     };
 
     return (

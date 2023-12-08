@@ -24,14 +24,12 @@ export default function Profile() {
             try {
 
                 const response = await axios.get("http://localhost:10000/profile");
-                /* console.log(response); */
 
                 if (response.statusText !== "OK") {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
 
                 const userData = response.data;
-                console.log("user data:::",userData)
                 setUser(userData);
                 setLoading(false);
                 setError(null);

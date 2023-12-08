@@ -9,10 +9,8 @@ const SignUpClassesDetails = () => {
         const fetchSignUpDetails = async () => {
             try {
                 const response = await axios.get("signup-details");
-                console.log(response)
                 const data = response.data;
                 setSignUpDetails(data);
-                {console.log("data::", data)}
             } catch (error) {
                 console.error("Error fetching sign-up details:", error);
             }

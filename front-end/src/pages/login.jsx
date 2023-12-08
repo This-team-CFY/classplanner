@@ -5,7 +5,6 @@ import { Container } from '@mui/material';
 
 const Login = () => {
   const onSubmit = (data) => {
-    console.log("submit", data);
   }
   return (
     <Container maxWidth="sm">

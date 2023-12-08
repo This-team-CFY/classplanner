@@ -55,7 +55,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     },
 }));
 
-const Navbar = () => {
+const Navbar = ({ onCityChange, selectedCities }) => {
     const { logout } = useAuthContext();
     const handleLogout = () => {
         logout();
@@ -73,9 +73,13 @@ const Navbar = () => {
                     minHeight: '70px',
                     height: 'auto',
                     marginTop: '140px',
-                }, }}>
+                },
+            }}>
                 <Toolbar>
-                    <NavbarFilter />
+                    <NavbarFilter
+                        onCityChange={onCityChange}
+                        selectedCities={selectedCities}
+                    />
                     <Search>
                         <SearchIconWrapper>
                             <SearchIcon />

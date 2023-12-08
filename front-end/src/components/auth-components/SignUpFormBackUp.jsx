@@ -88,7 +88,6 @@ Personal Development Rep 2
             const result = await response.json();
 
             if (response.ok) {
-                console.log(result.message);
                 // Replace to main page when we created
             } else {
                 console.error(result.error);

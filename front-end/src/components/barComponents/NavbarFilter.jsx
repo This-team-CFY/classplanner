@@ -18,8 +18,8 @@ const MenuProps = {
     },
 };
 
-export default function MultipleSelectCheckmarks() {
-    const [selectedCities, setSelectedCities] = useState([]);
+export default function MultipleSelectCheckmarks({ onCityChange, selectedCities }) {
+    //const [selectedCities, setSelectedCities] = useState([]);
     const [cityData, setCityData] = useState([]);
 
     useEffect(() => {
@@ -34,6 +34,7 @@ export default function MultipleSelectCheckmarks() {
 
                 const data = await response.json();
                 setCityData(data);
+                //onCityChange(["London"])
             } catch (error) {
                 console.error('Error fetching city data:', error.message);
             }
@@ -43,7 +44,7 @@ export default function MultipleSelectCheckmarks() {
 
     }, []); // Empty dependency array ensures the effect runs once when the component mounts
 
-    const handleChange = (event) => {
+/*     const handleChange = (event) => {
         const {
             target: { value },
         } = event;
@@ -51,7 +52,19 @@ export default function MultipleSelectCheckmarks() {
             // On autofill, we get a stringified value.
             typeof value === 'string' ? value.split(',') : value
         );
+    }; */
+
+    const handleChange = (event) => {
+        const {
+            target: { value },
+        } = event;
+        const selectedCitiesArray = typeof value === 'string' ? value.split(',') : value;
+
+        //setSelectedCities(selectedCitiesArray);
+        // Pass the selected cities to the parent component using the callback
+        onCityChange(selectedCitiesArray);
     };
+    console.log(selectedCities)
 
     return (
         <div>
