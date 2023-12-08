@@ -4,17 +4,28 @@ import SignUpLessonButton from './SignUpLessonButton';
 import "../../styles/ClassCard.scss";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+const formatTime = (timeString) => {
+    const date = new Date(timeString);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+};
+
 const ClassCard = (props) => {
     return (
         <div className="blog-slider">
             <div className="blog-slider__item">
-                <div className="blog-slider__img">
+                <div className="blog-slider__img" >
                     <img src="https://res.cloudinary.com/muhammederdem/image/upload/q_60/v1535759871/jason-leung-798979-unsplash.webp" alt="Date pic" />
-                    <div className='blog-slider__title'>
+                    <div className='blog-slider__title' style={{ fontFamily: "'Oswald', sans-serif"}}>
                         <p>{props.date.substring(8, 10)}</p>
                         <p>{props.date.substring(5, 7)}</p>
                         <p>{props.date.substring(0, 4)}</p>
-                        <p style={{ fontSize: "14px" }}>{props.time_start.substring(0, 5)} - {props.time_end.substring(0, 5)}</p>
+                        <p style={{fontSize: "14px" }}>
+                                {formatTime(props.time_start)} - {formatTime(props.time_end)}
+                        </p>                        
+                            
+                         
                     </div>
                 </div>
 
