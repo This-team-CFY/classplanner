@@ -21,17 +21,26 @@ export default function SessionForm() {
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(null);
+  const [lessons, setLessons] = useState([]);
+  const [cohorts, setCohorts] = useState([]);
+  const [selectedCohort, setSelectedCohort] = useState(null);
+  const [selectedLesson, setSelectedLesson] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
       try {
         const response = await axios.get("session");
         const cohorts = await axios.get("cohort");
+        const lessons = await axios.get("lesson_content");
+        setCohorts(cohorts.data.map(
+          item => ({name: item.name, onselect: () => setSelectedCohort(item.id)})
+        ));
+        setLessons(lessons.data);
         setEvent(response.data.map((item) => item.event_type));
         setLocation(response.data.map((item) => item.location));
-        setCohort(response.data.map((item) => item.cohort));
+        //setCohort(cohorts.data.map((item) => item.name));
         setDescription(
-          response.data.map(
+          lessons.data.map(
             (item) =>
               `Module: ${item.module},\nWeek: ${item.module_week},\n link: ${item.syllabus_link}`
           )
@@ -59,22 +68,17 @@ export default function SessionForm() {
   }, []);
 
   async function submitForm() {
-    const {module_name, module_week, syllabus_link} = JSON.parse(description);
+    
     try {
       const response = await axios.post("/session", {
-        id: 2,
         date: startDate.split("T")[0],
         time_start: startDate.split("T")[1].split(".")[0],
         time_end: endDate.split("T")[1].split(".")[0],
-        cohort: cohort,
-        //     city: "London",
+        cohort_id: selectedCohort,
         location: location,
-        module_name: module_name,
-        module_week: module_week,
-        syllabus_link: syllabus_link,
         event_type: event,
-//     lesson_content_id INT REFERENCES lesson_content(id),  -- derive name of session from this+cohort
-//     cohort_id INT REFERENCES cohort(id)
+        lesson_content_id: selectedLesson,
+
       });
     } catch (error) {
       console.log(error);
@@ -130,7 +134,7 @@ export default function SessionForm() {
         </label>
         <label className="form-label">
           {" "}
-          Description
+          Lesson Description
           <br></br>
           <EditableField name="description" type="text" options={description} />
         </label>
