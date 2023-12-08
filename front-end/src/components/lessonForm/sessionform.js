@@ -6,8 +6,6 @@ import axios from '../../utils/axios';
 
 
 const module = ["HTML", "CSS", "JS1", "JS2", "JS3", "Node.js", "SQL"];
-const location = [1, 2, 3, 4, 5];
-const city = ["London", "Glasgow", "Manchester"];
 const lesson = [
   "HTML_link",
   "CSS_link",
@@ -23,10 +21,33 @@ export default function SessionForm() {
     console.log("Form submitted");
     const response = await axios.post("/session", {});
   }
-
+  const [city, setCity] = useState([]);
   const [inputValue, setInputValue] = useState("Saturday Session");
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(null);
+
+  const [location_field, setLocation_field] = useState("");
+  const [city_field, setCity_field] = useState("");
+  const [description_field, setDescription_field] = useState("");
+
+useEffect(() => {
+  // Simulate fetching data from the database
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/cities`
+      );
+
+      const data =response.data;
+      setCity(data);
+    } catch (error) {
+      console.error("Error fetching city data:", error.message);
+    }
+  };
+
+  fetchData(); // Call the fetchData function
+}, []); // Empty dependency array ensures the effect runs once when the component mounts
+
 
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
@@ -74,18 +95,18 @@ export default function SessionForm() {
         <label className="form-label">
           {" "}
           Location<br></br>
-          <EditableField name="location" type="text" options={location} />
+          <input setField={setLocation_field} name="location" type="text" />
         </label>
         <label className="form-label">
           {" "}
           City(calendar)<br></br>
-          <EditableField name="city" type="text" options={city} />
+          <EditableField setField={setCity_field} optionsKey={"name"} optionsValue={'id'} name="city" type="text" options={city} />
         </label>
         <label className="form-label">
           {" "}
           Description
           <br></br>
-          <EditableField name="description" type="text" options={lesson} />
+          <EditableField setField={setDescription_field} name="description" type="text" options={lesson} />
         </label>
       </form>
       <button type="submit" onClick={submitForm}>

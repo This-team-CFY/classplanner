@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./form.css";
 import { colors } from "@mui/material";
 
-const EditableField = ({ options }, name, type) => {
+const EditableField = ({ options, setField,optionsKey, optionsValue }, name, type) => {
   const [isInputVisible, setInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
@@ -13,10 +13,12 @@ const EditableField = ({ options }, name, type) => {
 
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
+    setField(e.target.value)
   };
 
   const handleSelectChange = (e) => {
     setSelectedOption(e.target.value);
+    setField(e.target.value);
   };
 
   return (
@@ -42,6 +44,11 @@ const EditableField = ({ options }, name, type) => {
             Select or press "+" to add an option
           </option>
           {options ? (
+            optionsKey ?  options.map((option) => (
+              <option key={option[optionsValue]} value={option[optionsValue]}>
+                {option[optionsKey]}
+              </option>
+            )):
             options.map((option) => (
               <option key={option} value={option}>
                 {option}
