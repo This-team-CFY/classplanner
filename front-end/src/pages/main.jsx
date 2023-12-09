@@ -40,7 +40,7 @@ const Main = () => {
 
 
     return (
-      // <UserGuard>
+       <UserGuard>
       <div
         className="main-container"
         style={{
@@ -71,7 +71,7 @@ const Main = () => {
           />
         ))}
       </div>
-      // </UserGuard>
+       </UserGuard>
     );
 };
 
