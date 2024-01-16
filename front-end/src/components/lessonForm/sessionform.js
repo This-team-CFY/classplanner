@@ -4,33 +4,87 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from '../../utils/axios';
 
-
-const module = ["HTML", "CSS", "JS1", "JS2", "JS3", "Node.js", "SQL"];
-const location = [1, 2, 3, 4, 5];
-const city = ["London", "Glasgow", "Manchester"];
-const lesson = [
-  "HTML_link",
-  "CSS_link",
-  "JS1_link",
-  "JS2_link",
-  "JS3_link",
-  "Node.js_link",
-  "SQL_link",
-];
-
 export default function SessionForm() {
-  async function submitForm() {
-    console.log("Form submitted");
-    const response = await axios.post("/session", {});
-  }
-
-  const [inputValue, setInputValue] = useState("Saturday Session");
+  const [sessionData, setSessionData] = useState([{}]);
+  const [cohortData, setCohortData] = useState([{}]);
+  const [lessonData, setLessonData] = useState([{}])
+  const [event, setEvent] = useState(["Saturday Session"]);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(null);
-
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
+  const [location, setLocation] = useState("");
+  const [cohort, setCohort] = useState([]);
+  const [description, setDescription] = useState("");
+  const [summary, setSummary] = useState("");
+  
+  const handleSelectEvent = (selectedValue) => {
+    setEvent(selectedValue);
   };
+
+  const handleSelectLocation = (selectedValue) => {
+    setLocation(selectedValue);
+  };  
+
+  const handleSelectCohort = (selectedValue) => {
+    let cohortId = cohortData.find(item => item.name === selectedValue);
+    setCohort(cohortId ? cohort.id: 1);
+  };  
+
+  const handleSelectDescription = (selectedValue) => {
+    let lesson = lessonData.find(
+      item => (
+        selectedValue.includes(item.module) &&
+        selectedValue.includes(item.module_week) &&
+        selectedValue.includes(item.syllabus_link)
+    ));
+    
+    setDescription(lesson ? lesson.id : null);
+    setSummary(selectedValue);
+    console.log(selectedValue)
+  };  
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await axios.get("session");
+        const cohorts = await axios.get("cohort");
+        const lessons = await axios.get("lesson_content");
+        setSessionData(response.data);
+        setCohortData(cohorts.data);
+        setLessonData(lessons.data);
+    } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchData();
+  }, []);
+
+  async function submitForm() {
+    
+    let sessionInfo = {
+      date: JSON.stringify(startDate).split("T")[0],
+      time_start: JSON.stringify(startDate).split("T")[1].split(".")[0],
+      start_time: startDate,
+      end_time: endDate,
+      time_end: JSON.stringify(endDate).split("T")[1].split(".")[0],
+      cohort_id: cohort,
+      location: location,
+      event_type: event,
+      lesson_content_id: description,
+      summary: summary,
+    };
+    
+    try {
+      const response = await axios.post("/session", sessionInfo);
+    } catch (error) {
+      console.log(error);
+    }
+    try {
+      const calendarEvent = await axios.post("create-event", sessionInfo);
+    } catch (error) {
+      console.log(error);
+    }
+    
+  }
 
   return (
     <div className="formDiv">
@@ -39,15 +93,12 @@ export default function SessionForm() {
         <label className="form-label">
           {" "}
           Event<br></br>
-          <div className="input-line">
-            <input
-              type="text"
-              name="event_name"
-              value={inputValue}
-              onChange={handleInputChange}
-              autoFocus
-            />
-          </div>
+          <EditableField
+            name="event"
+            type="text"
+            options={sessionData.map((item) => item.event_type)}
+            onSelectChange={handleSelectEvent}
+          />
         </label>
         <label className="form-label">
           Date
@@ -74,18 +125,36 @@ export default function SessionForm() {
         <label className="form-label">
           {" "}
           Location<br></br>
-          <EditableField name="location" type="text" options={location} />
+          <EditableField
+            name="location"
+            type="text"
+            options={sessionData.map((item) => item.location)}
+            onSelectChange={handleSelectLocation}
+          />
         </label>
         <label className="form-label">
           {" "}
-          City(calendar)<br></br>
-          <EditableField name="city" type="text" options={city} />
+          Cohort<br></br>
+          <EditableField
+            name="cohort"
+            type="text"
+            options={cohortData.map((item) => item.name)}
+            onSelectChange={handleSelectCohort}
+          />
         </label>
         <label className="form-label">
           {" "}
-          Description
+          Lesson Description
           <br></br>
-          <EditableField name="description" type="text" options={lesson} />
+          <EditableField
+            name="description"
+            type="text"
+            options={lessonData.map(
+              (item) =>
+                `Module: ${item.module},\nWeek: ${item.week_no},\n link: ${item.syllabus_link}`
+            )}
+            onSelectChange={handleSelectDescription}
+          />
         </label>
       </form>
       <button type="submit" onClick={submitForm}>

@@ -163,22 +163,22 @@ app.get("/cohort", async (req, res) => {
   }
 });
 
-app.get("/create-event", async (req, res) => {
-  //console.log(calendar);
-  let newEvent = {
-    summary: "hello world",
-    location: "London, UK",
-    startDateTime: "2023-12-02T10:00:00",
-    endDateTime: "2023-12-02T17:00:00",
-  };
-
+app.post("/create-event", async (req, res) => {
+  console.log("request recieved")
+  const {
+    date,
+    start_time,
+    end_time,
+    location,
+    summary
+  } = req.body;
   await calendar.events.insert({
     // auth: oauth2Client,
     calendarId:
       "4c572a675834bb44f3c7a1cd40456214e4a2a75fa67a890e40212effcd7d9989@group.calendar.google.com",
     requestBody: {
-      summary: newEvent.summary,
-      location: newEvent.location,
+      summary: summary,
+      location: location,
       // attendees: [
       //   {
       //     email: "jonathanzheng8888@gmail.com",
@@ -186,10 +186,10 @@ app.get("/create-event", async (req, res) => {
       // ],
       colorId: "7",
       start: {
-        dateTime: new Date(newEvent.startDateTime),
+        dateTime: new Date(start_time),
       },
       end: {
-        dateTime: new Date(newEvent.endDateTime),
+        dateTime: new Date(end_time),
       },
     },
   });
@@ -397,24 +397,26 @@ app.get("/session", async (req, res) => {
   }
 });
 
-app.post("/session", verifyToken, async (req, res) => {
-  try {
-    await pool.query(
-      "INSERT INTO session(date, time_start, time_end, event_type, location, lesson_content_id, cohort_id) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-      [
-        new Date(),
-        new Date(),
-        new Date(),
-        "Technical Education",
-        "London",
-        1,
-        1,
-      ]
-    );
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: "Something went wrong." });
-  }
+app.post("/session", async (req, res) => {
+   console.log("request recieved");
+  const {date, time_start, time_end, cohort_id, location, event_type, lesson_content_id} = req.body;
+    try {
+      await pool.query(
+        "INSERT INTO session(date, time_start, time_end, event_type, location, lesson_content_id, cohort_id) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+        [
+          date,
+          time_start,
+          time_end,
+          event_type,
+          location,
+          lesson_content_id,
+          cohort_id,
+        ]
+      );
+      res.json({ success: true });
+    } catch (error) {
+      res.send(error);
+    }
 });
 
 app.get("/lesson_content", async (req, res) => {
@@ -426,7 +428,7 @@ app.get("/lesson_content", async (req, res) => {
   }
 });
 
-app.post("/lesson_content", verifyToken, async (req, res) => {
+app.post("/lesson_content", async (req, res) => {
   try {
     const { module, module_no, week_no, lesson_topic, syllabus_link } =
       req.body;

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./form.css";
 import { colors } from "@mui/material";
 
-const EditableField = ({ options }, name, type) => {
+const EditableField = ({ options, name, type, onSelectChange }) => {
   const [isInputVisible, setInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
@@ -13,10 +13,13 @@ const EditableField = ({ options }, name, type) => {
 
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
+    onSelectChange(e.target.value);
   };
 
   const handleSelectChange = (e) => {
-    setSelectedOption(e.target.value);
+    const selectedValue = e.target.value;
+    setSelectedOption(selectedValue);
+    onSelectChange(selectedValue);
   };
 
   return (
