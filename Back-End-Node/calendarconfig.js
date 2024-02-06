@@ -15,7 +15,6 @@ const SCOPES = [
 const auth = new google.auth.JWT({
   subject: "classplanner@class-planner-405420.iam.gserviceaccount.com", // specify subject (user whose context you want to operate in)
   keyFile: "class-planner.json",
-  //keyFile: JSON.parse(process.env.CALENDAR),
   scopes: SCOPES,
 });
 
