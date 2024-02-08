@@ -93,7 +93,7 @@ const SlackLoginButton = ({ onLoged, onError }) => {
                 },
             }}
         >
-            Signup With Slack
+            Log In With Slack
         </Button>
     );
 
