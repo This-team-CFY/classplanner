@@ -133,7 +133,7 @@ const options = {
 if (process.env.LOCAL_DEVELOPMENT) {
   // Slack requires https for OAuth, but locally we want to use http
   // to avoid having to maintain our own certificates
-  https.createServer(options, app).listen(443);
+  //https.createServer(options, app).listen(443);
   http.createServer(app).listen(10000);
 } else {
   // when we deploy on Vercel, Vercel adds HTTPS for us, so we can just use one port
@@ -164,7 +164,7 @@ app.get("/cohort", async (req, res) => {
 });
 
 app.post("/create-event", async (req, res) => {
-  console.log("request recieved")
+  console.log("request received")
   const {
     date,
     start_time,
@@ -227,63 +227,6 @@ app.get("/events", async (req, res) => {
     res.status(500).send("Error fetching events");
   }
 });
-
-//fetching only saturdays events
-// const currentDate = new Date();
-// const today = currentDate.getDay(); // Get the current day of the week
-
-// // Calculate the date for the first upcoming Saturday
-// const firstSaturday = new Date(currentDate.getTime());
-// const daysUntilSaturday = 6 - today; // Days until the next Saturday
-// firstSaturday.setDate(firstSaturday.getDate() + daysUntilSaturday);
-
-// // Array to store start and end dates for three Saturdays
-// const saturdays = [];
-// for (let i = 0; i < 3; i++) {
-//   const startDate = new Date(firstSaturday.getTime());
-//   startDate.setDate(startDate.getDate() + i * 7); // Increment by a week for each Saturday
-
-//   const endDate = new Date(startDate.getTime());
-//   endDate.setDate(endDate.getDate() + 1); // One day after the start date (i.e., Sunday)
-
-//   saturdays.push({ startDate, endDate });
-// }
-
-// // Retrieve events for each of the three Saturdays
-// saturdays.forEach(({ startDate, endDate }) => {
-//   calendar.events.list(
-//     {
-//       calendarId: "primary",
-//       timeMin: startDate.toISOString(),
-//       timeMax: endDate.toISOString(),
-//       singleEvents: true,
-//       orderBy: "startTime",
-//     },
-//     (err, res) => {
-//       if (err) {
-//         console.error("Error fetching events:", err);
-//         return;
-//       }
-//       const events = res.data.items;
-//       if (events.length) {
-//         console.log(
-//           `Events on ${startDate.toLocaleDateString("en-US", {
-//             weekday: "long",
-//           })}:`
-//         );
-//         events.forEach((event) => {
-//           console.log(`${event.summary} - ${event.start.dateTime}`);
-//         });
-//       } else {
-//         console.log(
-//           `No events found on ${startDate.toLocaleDateString("en-US", {
-//             weekday: "long",
-//           })}.`
-//         );
-//       }
-//     }
-//   );
-// });
 
 //Profile endpoint
 app.get("/profile", verifyToken, async (req, res) => {
