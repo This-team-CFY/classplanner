@@ -385,9 +385,9 @@ app.get("/session", async (req, res) => {
         lesson_content.week_no AS module_week,
         lesson_content.syllabus_link
       FROM session
-      JOIN lesson_content
+      LEFT JOIN lesson_content
       ON session.lesson_content_id = lesson_content.id
-      JOIN cohort
+      LEFT JOIN cohort
       ON session.cohort_id = cohort.id;
     `);
     res.send(result.rows);
@@ -399,14 +399,14 @@ app.get("/session", async (req, res) => {
 
 app.post("/session", async (req, res) => {
    console.log("request recieved");
-  const {date, time_start, time_end, cohort_id, location, event_type, lesson_content_id} = req.body;
+  const {date, start_time, end_time, cohort_id, location, event_type, lesson_content_id} = req.body;
     try {
       await pool.query(
         "INSERT INTO session(date, time_start, time_end, event_type, location, lesson_content_id, cohort_id) VALUES ($1, $2, $3, $4, $5, $6, $7)",
         [
           date,
-          time_start,
-          time_end,
+          start_time,
+          end_time,
           event_type,
           location,
           lesson_content_id,
@@ -415,6 +415,7 @@ app.post("/session", async (req, res) => {
       );
       res.json({ success: true });
     } catch (error) {
+      console.log(error);
       res.send(error);
     }
 });

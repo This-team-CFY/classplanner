@@ -6,7 +6,7 @@ import { useAuthContext } from "../../auth/useAutContext";
 const AdminButton = () => {
 
     const { user } = useAuthContext();
-    const [isAdmin, setAdmin] = useState(false);
+    const [isAdmin, setAdmin] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
@@ -14,9 +14,9 @@ const AdminButton = () => {
         if (token) {
             const decodedToken = JSON.parse(atob(token.split('.')[1]));
 
-            if (decodedToken.roles == 'admin') {
-                setAdmin(true);
-            }
+            // if (decodedToken.roles == 'admin') {
+            //     setAdmin(true);
+            // }
         }
     }, []);
 
