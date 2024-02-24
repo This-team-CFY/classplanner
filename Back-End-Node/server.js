@@ -14,7 +14,7 @@ const jwt = require("jsonwebtoken");
 const frontendUrl = process.env.FRONT_END_URL;
 const verifyToken = require("./verifyToken");
 const verifyAdminToken = require("./verifyAdminToken.js");
-const reminderEmail = require('./reminder');
+const reminderEmail = require("./reminder");
 
 const {
   getSignUpDetailsFromDatabase,
@@ -28,7 +28,7 @@ const {
 app.use(cors());
 app.use(express.json());
 require("dotenv").config();
-app.use('/api', reminderEmail); //reminder email
+app.use("/api", reminderEmail); //reminder email
 const client_id = process.env.VITE_SLACK_CLIENT_ID;
 const client_secret = process.env.SLACK_CLIENT_SECRET;
 const redirect_uri = `${process.env.BACK_END_URL_SLACK}/auth/redirect`;
@@ -92,7 +92,10 @@ app.get("/auth/redirect", async (req, res) => {
         role !== "admin"
       ) {
         updateTitle(existingUser.rows[0]["id"], role);
-      } else if (role == "admin" && existingUser.rows[0]["slack_title"] !== "admin") {
+      } else if (
+        role == "admin" &&
+        existingUser.rows[0]["slack_title"] !== "admin"
+      ) {
         res
           .status(401)
           .json({ error: "You can not change your role as admin" });
@@ -164,14 +167,8 @@ app.get("/cohort", async (req, res) => {
 });
 
 app.post("/create-event", async (req, res) => {
-  console.log("request recieved")
-  const {
-    date,
-    start_time,
-    end_time,
-    location,
-    summary
-  } = req.body;
+  console.log("request recieved");
+  const { date, start_time, end_time, location, summary } = req.body;
   await calendar.events.insert({
     // auth: oauth2Client,
     calendarId:
@@ -352,14 +349,14 @@ app.post("/insert-signup", verifyToken, async (req, res) => {
     const sessionId = req.body.sessionId;
     const userId = req.userId;
     const role = req.body.role;
-    
-    await insertSignUp(sessionId, role, userId);
-    try {  // email service
-      await reminderEmail(userId, sessionId);
 
+    await insertSignUp(sessionId, role, userId);
+    try {
+      // email service
+      await reminderEmail(userId, sessionId);
     } catch (error) {
-      console.error('Error sending reminder email:', error);
-      res.status(500).json({ error: 'Something went wrong.' });
+      console.error("Error sending reminder email:", error);
+      res.status(500).json({ error: "Something went wrong." });
     }
     res.json({ success: true });
   } catch (error) {
@@ -377,18 +374,15 @@ app.get("/session", async (req, res) => {
         session.date,
         session.time_start,
         session.time_end,
-        'Barath' AS who_leading,
-        cohort.name AS cohort,
-        'London' AS city,
-        session.location,
+        'Mentor' AS who_leading,
+        'UK' AS city,
+        session.meeting_link,
         lesson_content.module AS module_name,
         lesson_content.week_no AS module_week,
         lesson_content.syllabus_link
       FROM session
-      LEFT JOIN lesson_content
-      ON session.lesson_content_id = lesson_content.id
-      LEFT JOIN cohort
-      ON session.cohort_id = cohort.id;
+      JOIN lesson_content
+      ON session.lesson_content_id = lesson_content.id;
     `);
     res.send(result.rows);
   } catch (error) {
@@ -398,26 +392,34 @@ app.get("/session", async (req, res) => {
 });
 
 app.post("/session", async (req, res) => {
-   console.log("request recieved");
-  const {date, start_time, end_time, cohort_id, location, event_type, lesson_content_id} = req.body;
-    try {
-      await pool.query(
-        "INSERT INTO session(date, time_start, time_end, event_type, location, lesson_content_id, cohort_id) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-        [
-          date,
-          start_time,
-          end_time,
-          event_type,
-          location,
-          lesson_content_id,
-          cohort_id,
-        ]
-      );
-      res.json({ success: true });
-    } catch (error) {
-      console.log(error);
-      res.send(error);
-    }
+  console.log("request recieved");
+  const {
+    date,
+    start_time,
+    end_time,
+    cohort_id,
+    location,
+    event_type,
+    lesson_content_id,
+  } = req.body;
+  try {
+    await pool.query(
+      "INSERT INTO session(date, time_start, time_end, event_type, location, lesson_content_id, cohort_id) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+      [
+        date,
+        start_time,
+        end_time,
+        event_type,
+        location,
+        lesson_content_id,
+        cohort_id,
+      ]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
 });
 
 app.get("/lesson_content", async (req, res) => {

@@ -5,42 +5,42 @@ import ClassCard from "../components/classes/ClassCard";
 import UserGuard from "../auth/UserGuard";
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        height: '100px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
+  root: {
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    height: '100px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 }));
 
 const url = process.env.REACT_APP_BACKEND_URL
 
 const Main = () => {
-    const classes = useStyles();
-    const [data, setData] = useState([])
+  const classes = useStyles();
+  const [data, setData] = useState([])
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(`${url}/session`);
-                const result = await response.json();
-                setData(result);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${url}/session`);
+        const result = await response.json();
+        setData(result);
 
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
 
-        fetchData();
-    }, []);
+    fetchData();
+  }, []);
 
 
-    return (
-       <UserGuard>
+  return (
+    <UserGuard>
       <div
         className="main-container"
         style={{
@@ -48,11 +48,7 @@ const Main = () => {
         }}
       >
         <Navbar />
-        <iframe
-          title="calendar"
-          src="https://calendar.google.com/calendar/embed?src=4c572a675834bb44f3c7a1cd40456214e4a2a75fa67a890e40212effcd7d9989%40group.calendar.google.com&ctz=Europe%2FLondon"
-          style={{ border: 0, width: "800px", height: "350px", frameborder: 0 }}
-        ></iframe>
+
         {data.map((s) => (
           <ClassCard
             key={s.id}
@@ -71,8 +67,8 @@ const Main = () => {
           />
         ))}
       </div>
-       </UserGuard>
-    );
+    </UserGuard>
+  );
 };
 
 export default Main;
